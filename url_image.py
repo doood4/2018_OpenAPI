@@ -1,4 +1,4 @@
-from tkinter import *
+from tk import *
 from io import BytesIO
 import urllib
 import urllib.request
