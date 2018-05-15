@@ -71,3 +71,7 @@ sejong = {"":""}
 gugun_dict = {110000: seoul, 210000: busan, 220000: incheon, 230000: daegu, 240000 : gwangju, 250000: daejeon,
               260000: ulsan, 310000: gyeonggi, 320000: gangwon, 330000: chungbuk, 340000: chungnam,
               350000: jeonbuk, 360000: jeonnam, 370000:gyeongbuk, 380000:gyeongnam, 390000:jeju, 410000:sejong}
+
+
+##################################
+type = {}
