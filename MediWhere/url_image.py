@@ -1,4 +1,4 @@
-from tk import *
+from tk_1 import *
 from io import BytesIO
 import urllib
 import urllib.request
