@@ -16,6 +16,8 @@ class MyFrame(Frame):
         self.centreWindow()
         self.pack(fill=BOTH,expand=1)
 
+        self.data_list = []
+
         self.addr1 = ''
         self.addr2 = ''
         self.addr3 = ''
@@ -72,6 +74,7 @@ class MyFrame(Frame):
         # 검색 결과 출력 20개씩
         self.search_List = Listbox(self, width=50, height=20,borderwidth=3)
         self.search_List.place(x=10,y=140)
+        self.search_List.bind("<<ListboxSelect>>", self.select)
 
         # 페이지표시 및 버튼
         prev_Button = Button(self, text="<<", width=3, command=self.click_prev)
@@ -84,6 +87,24 @@ class MyFrame(Frame):
         self.t_page_Label = None
         next_Button = Button(self, text=">>", width=3, command=self.click_next)
         next_Button.place(x=250, y=470)
+
+        # 북마크, 이메일 보내기 버튼
+        inbookmark_Button = Button(self,text="★ 북마크담기",width=10)
+        inbookmark_Button.place(x=420,y=90)
+
+        outbookmark_Button = Button(self, text="북마크 보기", width=10)
+        outbookmark_Button.place(x=510, y=90)
+
+        email_Button = Button(self,text='Email',width=10)
+        email_Button.place(x=600,y=90)
+
+
+        # 정보출력 박스
+        self.info_Box = StringVar()
+        Label(self,textvariable=self.info_Box,width=50, height=20).place(x=420,y=140)
+
+        #self.info_Box = Listbox(self, width=50, height=20, borderwidth=3)
+        #self.info_Box.place(x=420, y=140)
 
 
 
@@ -99,7 +120,7 @@ class MyFrame(Frame):
         self.parent.geometry('%dx%d+%d+%d'%(w,h,x,y))
 
 
-    # 내가 필요한 클릭 스크롤바
+# 이벤트 핸들
     def sido_event(self, event):
         self.addr1 = self.sidoVar.get()
         self.addr2 = ''
@@ -120,12 +141,14 @@ class MyFrame(Frame):
 
     # 검색버튼 클릭시
     def click_search(self):
+        # 강력하다 업데이트 ㄷㄷ
+        self.update()
         self.search_List.delete(0,END) # 다시 검색시 출력박스 초기화
         self.addr3 = self.dong_Text.get()
         print(self.addr3)
-        tmp, total = make_list(self.addr1,self.addr2,self.addr3,self.type)
+        self.data_list, total = make_list(self.addr1,self.addr2,self.addr3,self.type)
         self.t_page = eval(total) // 20 + 1
-        for i in tmp:
+        for i in self.data_list:
             self.search_List.insert(END,i.name)
         #box.showinfo("Information", "Thank you!")
         self.c_page_Label = Label(self, text=str(self.c_page), font=self.chosenFont, background='white')
@@ -139,9 +162,9 @@ class MyFrame(Frame):
             self.c_page -= 1
             self.c_page_Label = Label(self, text=str(self.c_page), font=self.chosenFont, background='white')
             self.c_page_Label.place(x=150, y=470)
-            tmp, total = make_list(self.addr1, self.addr2, self.addr3, self.type, self.c_page)
+            self.data_list, total = make_list(self.addr1, self.addr2, self.addr3, self.type, self.c_page)
             self.t_page = eval(total) // 20 + 1
-            for i in tmp:
+            for i in self.data_list:
                 self.search_List.insert(END, i.name)
 
 
@@ -151,10 +174,22 @@ class MyFrame(Frame):
             self.c_page += 1
             self.c_page_Label = Label(self, text=str(self.c_page), font=self.chosenFont, background='white')
             self.c_page_Label.place(x=150, y=470)
-            tmp, total = make_list(self.addr1, self.addr2, self.addr3, self.type,self.c_page)
+            self.data_list, total = make_list(self.addr1, self.addr2, self.addr3, self.type,self.c_page)
             self.t_page = eval(total) // 20 + 1
-            for i in tmp:
+            for i in self.data_list:
                 self.search_List.insert(END, i.name)
+
+
+    def select(self,val):
+        sender = val.widget
+        idx = sender.curselection()
+        value = sender.get(idx)
+        for i in self.data_list:
+            if value == i.name:
+                print(i.name)
+                self.info_Box.set(i.__str__())
+
+
 
 
 

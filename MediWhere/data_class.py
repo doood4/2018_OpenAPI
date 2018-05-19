@@ -18,7 +18,18 @@ class Hospital_data():
         print("-----------------------------")
 
     def __str__(self):
-        return self.name + '\n' + self.type + '\n' + self.addr + '\n' +'------------------------'
+        if '(' in self.addr:
+            addr1 = self.addr.split('(')[0]
+            addr2 = '(' + self.addr.split('(')[1]
+            return self.name + '\n' + self.type + '\n' + addr1 + '\n' + addr2\
+                    + '\n' + self.tel + '\n' +self.url
+
+
+        else:
+            return self.name + '\n' + self.type + '\n' + self.addr\
+                   + '\n' + self.tel + '\n' +self.url
+
+
 
 def make_Mydatalist(list):
     result = []
