@@ -1,7 +1,7 @@
 
-def make_googlemap_url(center ,zoom = 15):
+def make_googlemap_url(center = (126.884639554,37.4911811753) ,zoom = 16, maptype = 'roadmap'):
     key = 'AIzaSyA9gjC63ldBuHDwYM6flkFJDbTq6vQhFdg'
-    point = str(center[1]) +','+ str(center[0])
+    point = str(center[1]) + ',' + str(center[0])
     size = (500,500)
 
     url = "http://maps.google.com/maps/api/staticmap?"
@@ -9,7 +9,7 @@ def make_googlemap_url(center ,zoom = 15):
     url += "zoom=%i&" % zoom
     url += 'scale=1&'
     url += "size=" + str(size[0]) + 'x' + str(size[1]) + '&'
-    url += 'maptype=roadmap&'
+    url += 'maptype=' +maptype + '&'
     url +='&markers=color:red%7Clabel:C%7C' + point + '&'
     url += 'key=' + key
 

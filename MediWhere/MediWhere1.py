@@ -30,6 +30,8 @@ class MyFrame(Frame):
 
         self.map_url = ''
         self.map_image = None
+        self.map_zoom = 15
+        self.map_type = 'roadmap'
         self.xpos = ''
         self.ypos = ''
 
@@ -123,16 +125,26 @@ class MyFrame(Frame):
         homepage_Button = Button(self,text='HomePage',width=10, command=self.click_homepage)
         homepage_Button.place(x=690,y=90)
 
-
     # 정보출력 박스
         self.info_Box = StringVar()
-        info_label = Label(self,textvariable=self.info_Box, width=40, height=8, font=self.chosenFont)
-        info_label.place(x=430,y=140)
+        info_label = Label(self,textvariable=self.info_Box, width=45, height=8, font=self.chosenFont)
+        info_label.place(x=410, y=140)
 
     # 지도출력 박스
-        self.map_label = Label(self, image=self.map_image, height=200, width=350)
-        self.map_label.place(x=430, y=300)
+        self.map_label = Label(self, image=self.map_image, height=250, width=350, background='white')
+        self.map_label.place(x=415, y=280)
 
+    # @ 버튼
+        mapChange_Button = Button(self,text='◎',width=1, command=self.map_change)
+        mapChange_Button.place(x=775,y=280)
+
+    # + 버튼
+        zoomIn_Button = Button(self, text="+", width=1, command=self.zoom_in)
+        zoomIn_Button.place(x=775, y=310)
+
+    # - 버튼
+        zoomOut_Button = Button(self, text="-", width=1, command=self.zoom_out)
+        zoomOut_Button.place(x=775, y=335)
 
 
     # 프로그램창 크기 및 항상 중앙에 띄우기
@@ -179,7 +191,6 @@ class MyFrame(Frame):
         self.t_page_Label.config(text=str(self.t_page))
 
 
-
     # << 버튼 클릭
     def click_prev(self):
         if self.c_page > 1:
@@ -202,7 +213,7 @@ class MyFrame(Frame):
             for i in self.data_list:
                 self.search_List.insert(END, i.name)
 
-    # 병원리스트 선택시
+    # 병원리스트 선택시 -> 정보와 지도 출력
     def select(self,val):
         self.update()
         sender = val.widget
@@ -217,9 +228,9 @@ class MyFrame(Frame):
                 print(self.xpos,self.ypos)
                 self.info_Box.set(i.__str__())
                 break
-
         # 지도출력
-        self.map_url = make_googlemap_url((self.xpos, self.ypos), 18)
+        self.map_zoom = 15
+        self.map_url = make_googlemap_url((self.xpos, self.ypos),self.map_zoom,self.map_type)
         with urlopen(self.map_url) as u:
             raw_data = u.read()
         im = Image.open(BytesIO(raw_data))
@@ -227,13 +238,51 @@ class MyFrame(Frame):
         self.map_label.configure(image=self.map_image)
         self.map_label.image = self.map_image
 
+    # @버튼 클릭
+    def map_change(self):
+        if self.map_url != '':
+            if self.map_type == 'roadmap':
+                self.map_type = 'hybrid'
+            elif self.map_type == 'hybrid':
+                self.map_type = 'roadmap'
+            self.map_url = make_googlemap_url((self.xpos, self.ypos), self.map_zoom, self.map_type)
+            with urlopen(self.map_url) as u:
+                raw_data = u.read()
+            im = Image.open(BytesIO(raw_data))
+            self.map_image = ImageTk.PhotoImage(im)
+            self.map_label.configure(image=self.map_image)
+            self.map_label.image = self.map_image
 
+    # + 버튼 클릭
+    def zoom_in(self):
+        if self.map_zoom < 20 and self.map_url != '':
+            self.map_zoom += 1
+            print(self.map_zoom)
+            self.map_url = make_googlemap_url((self.xpos, self.ypos), self.map_zoom,self.map_type)
+            with urlopen(self.map_url) as u:
+                raw_data = u.read()
+            im = Image.open(BytesIO(raw_data))
+            self.map_image = ImageTk.PhotoImage(im)
+            self.map_label.configure(image=self.map_image)
+            self.map_label.image = self.map_image
+
+    # - 버튼 클릭
+    def zoom_out(self):
+        if self.map_zoom > 10 and self.map_url != '':
+            self.map_zoom -= 1
+            print(self.map_zoom)
+            self.map_url = make_googlemap_url((self.xpos, self.ypos), self.map_zoom,self.map_type)
+            with urlopen(self.map_url) as u:
+                raw_data = u.read()
+            im = Image.open(BytesIO(raw_data))
+            self.map_image = ImageTk.PhotoImage(im)
+            self.map_label.configure(image=self.map_image)
+            self.map_label.image = self.map_image
 
     # 홈페이지 접속
     def click_homepage(self):
-        if self.url != '-':
+        if self.url != '-' and self.url != '':
             webbrowser.open_new(self.url)
-
 
     # 시구군 콤보박스 리스트 생성
     def make_sigugun(self):
@@ -242,16 +291,12 @@ class MyFrame(Frame):
         # self.sigugunVar.current(0)  # 시작값지정
 
 
-
 def main():
     root = Tk()
     root.resizable(width=FALSE,height=FALSE)
     root.iconbitmap('MediWhere_icon.ico')
-
     app = MyFrame(root)
-
     root.mainloop()
-
 
 ##################################
 if __name__ == '__main__':

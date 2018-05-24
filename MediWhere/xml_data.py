@@ -33,10 +33,6 @@ def make_list(addr1, addr2, addr3, type='',page = 1):
     HOSPITAL = make_Mydatalist(xml_data)
 
     total = soup.find('totalCount').get_text()
-    print(total)
-
-    for i in HOSPITAL:
-        i.print()
 
     return (HOSPITAL,total)
 
