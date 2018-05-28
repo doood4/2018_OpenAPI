@@ -4,11 +4,10 @@ from io import BytesIO
 import webbrowser
 from PIL import Image, ImageTk
 from google_map import make_googlemap_url
-from code_dictionary import *
 from xml_data import *
 
 
-class MyFrame(Frame):
+class Mediwhere(Frame):
     def __init__(self,parent):
         self.chosenFont = font.Font(family='Verdana', size=10, weight='normal')
 
@@ -84,31 +83,31 @@ class MyFrame(Frame):
 
     # 검색 결과 출력 ( 20개씩 )
         self.search_List = Listbox(self, width=50, height=20,borderwidth=3)
-        self.search_List.place(x=10,y=140)
+        self.search_List.place(x=10,y=150)
         self.search_List.bind("<<ListboxSelect>>", self.select)
 
     # 페이지표시 및 버튼
         # << 버튼
         prev_Button = Button(self, text="<<", width=3, command=self.click_prev)
-        prev_Button.place(x=100, y=470)
+        prev_Button.place(x=100, y=500)
 
         # 현재 페이지 표시
         self.c_page_Label = Label(self, text=str(self.c_page), font=self.chosenFont, background='white')
         self.c_page_Label.pack()
-        self.c_page_Label.place(x=150, y=470)
+        self.c_page_Label.place(x=150, y=500)
 
         # / 표시
         slash_Label = Label(self,text='/',font=self.chosenFont,background='white')
-        slash_Label.place(x=180,y=470)
+        slash_Label.place(x=180,y=500)
 
         # 총 페이지 표시
         self.t_page_Label = Label(self, text=str(self.t_page), font=self.chosenFont, background='white')
         self.t_page_Label.pack()
-        self.t_page_Label.place(x=200, y=470)
+        self.t_page_Label.place(x=200, y=500)
 
         # >> 버틍
         next_Button = Button(self, text=">>", width=3, command=self.click_next)
-        next_Button.place(x=250, y=470)
+        next_Button.place(x=250, y=500)
 
 
 
@@ -162,26 +161,24 @@ class MyFrame(Frame):
         self.addr1 = self.sidoVar.get()
         self.addr2 = ''
         self.addr3 = ''
-        print(self.addr1) # .get()= 타입 반환
         self.make_sigugun()
 
     def sigugun_event(self, event):
         self.addr2 = self.sigugunVar.get()
-        print(self.addr2)  # .get()= 타입 반환
+
 
     def dong_event(self,event):
         pass
 
     def type_event(self,event):
         self.type = self.typeVar.get()
-        print(self.type)
+
 
     # 검색버튼 클릭시
     def click_search(self):
         self.c_page = 1
         self.search_List.delete(0,END) # 다시 검색시 출력박스 초기화
         self.addr3 = self.dong_Text.get()
-        print(self.addr3)
         self.data_list, total = make_list(self.addr1,self.addr2,self.addr3,self.type)
         self.t_page = eval(total) // 20 + 1
         for i in self.data_list:
@@ -221,13 +218,12 @@ class MyFrame(Frame):
         value = sender.get(idx)
         for i in self.data_list:
             if value == i.name:
-                print(i.name)
                 self.url = i.url
                 self.xpos = i.xpos
                 self.ypos = i.ypos
-                print(self.xpos,self.ypos)
                 self.info_Box.set(i.__str__())
                 break
+
         # 지도출력
         self.map_zoom = 15
         self.map_url = make_googlemap_url((self.xpos, self.ypos),self.map_zoom,self.map_type)
@@ -257,7 +253,6 @@ class MyFrame(Frame):
     def zoom_in(self):
         if self.map_zoom < 20 and self.map_url != '':
             self.map_zoom += 1
-            print(self.map_zoom)
             self.map_url = make_googlemap_url((self.xpos, self.ypos), self.map_zoom,self.map_type)
             with urlopen(self.map_url) as u:
                 raw_data = u.read()
@@ -270,7 +265,6 @@ class MyFrame(Frame):
     def zoom_out(self):
         if self.map_zoom > 10 and self.map_url != '':
             self.map_zoom -= 1
-            print(self.map_zoom)
             self.map_url = make_googlemap_url((self.xpos, self.ypos), self.map_zoom,self.map_type)
             with urlopen(self.map_url) as u:
                 raw_data = u.read()
@@ -291,13 +285,16 @@ class MyFrame(Frame):
         # self.sigugunVar.current(0)  # 시작값지정
 
 
+
+######################################################
+
 def main():
     root = Tk()
     root.resizable(width=FALSE,height=FALSE)
     root.iconbitmap('MediWhere_icon.ico')
-    app = MyFrame(root)
+    app = Mediwhere(root)
     root.mainloop()
 
-##################################
+######################################################
 if __name__ == '__main__':
-    main()
+   main()

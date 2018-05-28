@@ -15,11 +15,9 @@ class Hospital_data():
             return '<   ' + self.name + '   >' + '\n' + self.type + '\n' + addr1 + '\n' + addr2\
                     + '\n' + '☎: ' + self.tel + '\n' +self.url
 
-
         else:
             return '<   ' +self.name + '   >'+ '\n' + self.type + '\n' + self.addr\
                    + '\n' + '☎: ' + self.tel + '\n' + self.url
-
 
 
 def make_Mydatalist(list):
@@ -42,6 +40,5 @@ def make_Mydatalist(list):
 
         result.append(Hospital_data(i.find('yadmNm').get_text(), i.find('clCdNm').get_text(), i.find('addr').get_text(),
                                     telno, url, xpos, ypos))
-
 
     return result
