@@ -42,9 +42,9 @@ class Example(Frame):
         self.salaryVar = StringVar()
         salaryLabel = Label(self, text="Salary:",textvariable=self.salaryVar)
         salaryLabel.grid(row=0, column=2,columnspan=2, sticky=W+E)
-        salaryScale = Scale(self, from_=10000,to=100000, orient=HORIZONTAL,
-                            resolution=500,command=self.onSalaryScale)
-        salaryScale.grid(row=1, column=2,columnspan=2, sticky=W+E)
+        salaryScale = Scale(self, from_=0,to=1, orient=HORIZONTAL,
+                            resolution=1,command=self.onSalaryScale)
+        salaryScale.grid(row=1, column=2,columnspan=1, sticky=W+E)
 
         # 체크박스 기능
         self.fullTimeVar = IntVar()

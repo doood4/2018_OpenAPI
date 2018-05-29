@@ -1,10 +1,11 @@
 from tkinter import *
-from tkinter import ttk, font, messagebox as box
+from tkinter import ttk, font, messagebox
 from io import BytesIO
 import webbrowser
 from PIL import Image, ImageTk
 from google_map import make_googlemap_url
 from xml_data import *
+from hyperlink import HyperlinkManager
 
 
 class Mediwhere(Frame):
@@ -19,7 +20,14 @@ class Mediwhere(Frame):
         self.centreWindow()
         self.pack(fill=BOTH, expand=1)
 
+        # 0 -> 검색모드 / 1 -> 북마크모드
+        self.mode = 0
+
+        #클릭한 데이터
+        self.value = ''
+
         self.data_list = []
+        self.bookmark_list = []
 
         self.addr1 = ''
         self.addr2 = ''
@@ -38,7 +46,7 @@ class Mediwhere(Frame):
         self.t_page = 1
 
     # MediWhere 상단로고
-        self.logo1 = PhotoImage(file="mediwhere_logo.gif")
+        self.logo1 = PhotoImage(file="MediWhere_logo.gif")
         self.logo2 = PhotoImage(file="kpu_logo.gif")
         self.logo_Label1 = Label(parent, image=self.logo1)
         self.logo_Label1.place(x=20, y=10)
@@ -70,18 +78,18 @@ class Mediwhere(Frame):
 
     # 병원 분류 라벨 표시와 입력
         type_Label = Label(self,text="분류",font=self.chosenFont, background='white')
-        type_Label.place(x=250,y=80)
+        type_Label.place(x=250, y=80)
         self.typeVar = StringVar()
         self.typeVar = ttk.Combobox(self,textvariable=self.typeVar, width=9)
         self.typeVar['values'] = list(hos_type.keys())
         self.typeVar.bind("<<ComboboxSelected>>", self.type_event)
-        self.typeVar.place(x=250,y=100)
+        self.typeVar.place(x=250, y=100)
 
     # 검색 버튼
         search_Button = Button(self, text="검색", width=3, command=self.click_search)
         search_Button.place(x=335,y=95)
 
-    # 검색 결과 출력 ( 20개씩 )
+    # 검색 결과 출력 ( 20개씩 ) -> 북마크에도 사용해야한다
         self.search_List = Listbox(self, width=50, height=20,borderwidth=3)
         self.search_List.place(x=10,y=150)
         self.search_List.bind("<<ListboxSelect>>", self.select)
@@ -107,27 +115,37 @@ class Mediwhere(Frame):
 
         # >> 버틍
         next_Button = Button(self, text=">>", width=3, command=self.click_next)
-        next_Button.place(x=250, y=500)
+        next_Button.place(x=240, y=500)
 
 
+    # 북마크, 이메일, 홈페이지 버튼
 
-    # 북마크, 이메일 홈페이지 버튼
-        inbookmark_Button = Button(self,text="★ 북마크담기",width=10)
-        inbookmark_Button.place(x=420,y=90)
+        # 검색/북마크 전환 스위치
+        self.switch = Scale(self, from_=0, to=1, orient=HORIZONTAL, resolution=1, length=80, sliderlength = 40,
+                       command = self.switch_event)
+        self.switch.place(x=410, y=80)
 
-        outbookmark_Button = Button(self, text="북마크 보기", width=10)
-        outbookmark_Button.place(x=510, y=90)
+        Label(self,text=' 검 색 | 북마크').place(x=410, y=80)
 
-        email_Button = Button(self,text='Email',width=10)
-        email_Button.place(x=600,y=90)
 
-        homepage_Button = Button(self,text='HomePage',width=10, command=self.click_homepage)
-        homepage_Button.place(x=690,y=90)
+        inbookmark_Button = Button(self, text="In 북마크", width=8, command=self.click_inbookmark)
+        inbookmark_Button.place(x=500, y=90)
+
+        outbookmark_Button = Button(self, text="Out 북마크", width=8, command=self.click_outbookmark)
+        outbookmark_Button.place(x=570, y=90)
+
+        # 이메일 버튼
+        email_Button = Button(self, text='Email', width=8, command=self.click_email)
+        email_Button.place(x=640, y=90)
+
+        # 홈페이지 접속
+        homepage_Button = Button(self,text='HomePage',width=8, command=self.click_homepage)
+        homepage_Button.place(x=710, y=90)
 
     # 정보출력 박스
         self.info_Box = StringVar()
-        info_label = Label(self,textvariable=self.info_Box, width=45, height=8, font=self.chosenFont)
-        info_label.place(x=410, y=140)
+        info_label = Label(self, textvariable=self.info_Box, width=45, height=8, font=self.chosenFont)
+        info_label.place(x=410, y=130)
 
     # 지도출력 박스
         self.map_label = Label(self, image=self.map_image, height=250, width=350, background='white')
@@ -146,6 +164,8 @@ class Mediwhere(Frame):
         zoomOut_Button.place(x=775, y=335)
 
 
+
+
     # 프로그램창 크기 및 항상 중앙에 띄우기
     def centreWindow(self):
         w = 800
@@ -156,41 +176,54 @@ class Mediwhere(Frame):
         y = (sh - h)/2
         self.parent.geometry('%dx%d+%d+%d'%(w,h,x,y))
 
-
+    # 주소 콤보박스 세팅
     def sido_event(self, event):
         self.addr1 = self.sidoVar.get()
         self.addr2 = ''
         self.addr3 = ''
         self.make_sigugun()
-
     def sigugun_event(self, event):
         self.addr2 = self.sigugunVar.get()
-
-
     def dong_event(self,event):
         pass
-
     def type_event(self,event):
         self.type = self.typeVar.get()
+
+    # 시구군 콤보박스 리스트 생성
+    def make_sigugun(self):
+        self.sigugunVar.set('')
+        self.sigugunVar['values'] = list(sigugun_dict[sido_dict[self.sidoVar.get()]].keys())
+
+
+    # 정보들 초기화함수
+    def clear_info(self):
+        #########  검색했던것들 초기화 부분  ###########
+        self.search_List.delete(0, END)
+        self.info_Box.set('')
+        self.map_image = None
+        self.map_label.configure(image=self.map_image)
+        self.map_label.image = self.map_image
+        #############################################
 
 
     # 검색버튼 클릭시
     def click_search(self):
+        self.switch.set(0)
+        self.mode = 0
         self.c_page = 1
-        self.search_List.delete(0,END) # 다시 검색시 출력박스 초기화
+        self.clear_info()
         self.addr3 = self.dong_Text.get()
         self.data_list, total = make_list(self.addr1,self.addr2,self.addr3,self.type)
         self.t_page = eval(total) // 20 + 1
         for i in self.data_list:
             self.search_List.insert(END,i.name)
-        #box.showinfo("Information", "Thank you!")
         self.c_page_Label.config(text=str(self.c_page))
         self.t_page_Label.config(text=str(self.t_page))
 
-
     # << 버튼 클릭
     def click_prev(self):
-        if self.c_page > 1:
+        self.clear_info()
+        if self.c_page > 1 and self.mode == 0:
             self.search_List.delete(0, END)  # 다시 검색시 출력박스 초기화
             self.c_page -= 1
             self.c_page_Label.config(text=str(self.c_page))
@@ -201,7 +234,8 @@ class Mediwhere(Frame):
 
     # >> 버튼 클릭
     def click_next(self):
-        if self.c_page < self.t_page:
+        self.clear_info()
+        if self.c_page < self.t_page and self.mode == 0:
             self.search_List.delete(0, END)  # 다시 검색시 출력박스 초기화
             self.c_page += 1
             self.c_page_Label.config(text=str(self.c_page))
@@ -215,17 +249,29 @@ class Mediwhere(Frame):
         self.update()
         sender = val.widget
         idx = sender.curselection()
-        value = sender.get(idx)
-        for i in self.data_list:
-            if value == i.name:
-                self.url = i.url
-                self.xpos = i.xpos
-                self.ypos = i.ypos
-                self.info_Box.set(i.__str__())
-                break
+        self.value = sender.get(idx)
+
+        if self.mode == 0: # 검색모드
+            for i in self.data_list:
+                if self.value == i.name:
+                    self.url = i.url
+                    self.xpos = i.xpos
+                    self.ypos = i.ypos
+                    self.info_Box.set(i.__str__())
+                    break
+
+        elif self.mode == 1: # 북마크 모드
+            for i in self.bookmark_list:
+                if self.value == i.name:
+                    self.url = i.url
+                    self.xpos = i.xpos
+                    self.ypos = i.ypos
+                    self.info_Box.set(i.__str__())
+                    break
 
         # 지도출력
         self.map_zoom = 15
+        self.map_type = 'roadmap'
         self.map_url = make_googlemap_url((self.xpos, self.ypos),self.map_zoom,self.map_type)
         with urlopen(self.map_url) as u:
             raw_data = u.read()
@@ -273,16 +319,70 @@ class Mediwhere(Frame):
             self.map_label.configure(image=self.map_image)
             self.map_label.image = self.map_image
 
+    # 스위치 전환 이벤트
+    def switch_event(self, event):
+        if self.switch.get() == 0:  # 스위치가 검색으로 바뀔때
+            self.mode = 0
+            self.clear_info()
+            for i in self.data_list:
+                self.search_List.insert(END, i.name)
+            self.c_page_Label.config(text=str(self.c_page))
+            self.t_page_Label.config(text=str(self.t_page))
+        elif self.switch.get() == 1:  # 스위치가 북마크로 바뀔때
+            self.mode = 1
+            # 북마크도 페이지 설정을 해야 할까?
+            self.c_page_Label.config(text=str(1))
+            self.t_page_Label.config(text=str(1))
+            self.clear_info()
+            # 북마크리스트 정보로 세팅
+            for i in self.bookmark_list:
+                self.search_List.insert(END, i.name)
+
+    # 북마크 담기
+    def click_inbookmark(self):
+        if self.mode == 0 and self.value != '':
+            ans = messagebox.askquestion('★북마크 담기', '"' + self.value + '"' + ' 을/를'
+                                         + '\n' + '북마크에 추가 하시겠습니까?')
+            if ans == 'yes':
+                for i in self.data_list:
+                    if self.value == i.name:
+                        if i not in self.bookmark_list:
+                            self.bookmark_list.append(i)
+                            msg = messagebox.showinfo("★북마크","잘 담겼습니다!")
+                        else:
+                            msg = messagebox.showerror("★북마크", "이미 담겨 있습니다!")
+                        break
+        #print(self.bookmark_list)
+
+    # 북마크 삭제
+    def click_outbookmark(self):
+        if self.mode == 1 and self.value != '':
+            ans = messagebox.askquestion('★북마크 삭제', '"' + self.value + '"' + ' 을/를'
+                                         + '\n' + '북마크에서 삭제 하시겠습니까?')
+            if ans == 'yes':
+                for i in self.bookmark_list:
+                    if self.value == i.name:
+                        self.bookmark_list.remove(i)
+                        msg = messagebox.showinfo("★북마크","삭제 완료!")
+                        break
+                #print(self.bookmark_list)
+                self.clear_info()
+                # 북마크리스트 정보로 세팅
+                for i in self.bookmark_list:
+                    self.search_List.insert(END, i.name)
+
+    # 이메일 보내기
+    def click_email(self):
+        if self.mode == 1: #북마크 모드에서만 보낼수 있음
+            pass
+        pass
+
     # 홈페이지 접속
     def click_homepage(self):
-        if self.url != '-' and self.url != '':
+        if self.url != '-' and self.url != '' and self.value :
             webbrowser.open_new(self.url)
 
-    # 시구군 콤보박스 리스트 생성
-    def make_sigugun(self):
-        self.sigugunVar.set('')
-        self.sigugunVar['values'] = list(sigugun_dict[sido_dict[self.sidoVar.get()]].keys())
-        # self.sigugunVar.current(0)  # 시작값지정
+
 
 
 
