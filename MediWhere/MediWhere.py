@@ -5,7 +5,6 @@ import webbrowser
 from PIL import Image, ImageTk
 from google_map import make_googlemap_url
 from xml_data import *
-from hyperlink import HyperlinkManager
 
 
 class Mediwhere(Frame):
@@ -383,11 +382,7 @@ class Mediwhere(Frame):
             webbrowser.open_new(self.url)
 
 
-
-
-
 ######################################################
-
 def main():
     root = Tk()
     root.resizable(width=FALSE,height=FALSE)
@@ -396,5 +391,4 @@ def main():
     root.mainloop()
 
 ######################################################
-if __name__ == '__main__':
-   main()
+
