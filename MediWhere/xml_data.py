@@ -10,7 +10,6 @@ decode_key = unquote('YwqDV590HcVx3fgfqBuuDeKB%2F8QsYQuRx2QYmJNnPU6MI99RlPoisyVi
 
 url = 'http://apis.data.go.kr/B551182/hospInfoService/getHospBasisList'
 
-
 def make_list(addr1, addr2, addr3, type='',page = 1):
     global decode_key, url
     queryParams = '?' + urlencode({quote_plus('ServiceKey'): decode_key,
@@ -35,6 +34,8 @@ def make_list(addr1, addr2, addr3, type='',page = 1):
     total = soup.find('totalCount').get_text()
 
     return (HOSPITAL,total)
+
+
 
 
 

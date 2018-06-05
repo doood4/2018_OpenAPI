@@ -164,7 +164,6 @@ class Mediwhere(Frame):
 
 
 
-
     # 프로그램창 크기 및 항상 중앙에 띄우기
     def centreWindow(self):
         w = 800
