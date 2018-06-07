@@ -5,6 +5,7 @@ import webbrowser
 from PIL import Image, ImageTk
 from google_map import make_googlemap_url
 from xml_data import *
+import gmail
 
 
 class Mediwhere(Frame):
@@ -43,6 +44,10 @@ class Mediwhere(Frame):
 
         self.c_page = 1
         self.t_page = 1
+
+        self.email_address = ''
+
+        #self.email_top.withdraw()
 
     # MediWhere 상단로고
         self.logo1 = PhotoImage(file="MediWhere_logo.gif")
@@ -371,9 +376,35 @@ class Mediwhere(Frame):
 
     # 이메일 보내기
     def click_email(self):
-        if self.mode == 1: #북마크 모드에서만 보낼수 있음
-            pass
-        pass
+        if self.mode == 1 and len(self.bookmark_list) != 0: #북마크 모드에서만 보낼수 있음
+            ## 메일입력창 설정
+            self.email_top = Toplevel(self)
+            self.email_top.iconbitmap('MediWhere_icon.ico')
+            self.email_Label = Label(self.email_top, text="받으실 메일 주소를 입력하세요")
+            self.email_Label.place(x=10, y=10)
+            self.email_entrybox = Entry(self.email_top, width=25)
+            self.email_entrybox.place(x=10, y=35)
+            self.email_top.geometry('%dx%d+%d+%d' % (200, 90,
+                                                     (self.parent.winfo_screenwidth() - 200) / 2,
+                                                     (self.parent.winfo_screenheight() - 50) / 2))
+
+            self.email_OK = Button(self.email_top, text='확인', command=self.set_email_address)
+            self.email_OK.place(x=80, y=60)
+
+            self.email_top.deiconify()
+
+
+    # 이메일 주소 입력되면 바로 메일 보내자
+    def set_email_address(self):
+        self.email_address = self.email_entrybox.get()
+        print(self.email_address)
+        self.email_entrybox.delete(0,'end')
+        self.email_top.withdraw()
+        if gmail.sendMail(self.email_address, gmail.MakeHtmlDoc(self.bookmark_list)) == True:
+            msg = messagebox.showinfo("EMAIL", "전송 완료!")
+        else:
+            msg = messagebox.showerror("EMAIL", "전송 실패!")
+
 
     # 홈페이지 접속
     def click_homepage(self):

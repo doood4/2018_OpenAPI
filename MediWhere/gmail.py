@@ -1,12 +1,9 @@
-import mysmtplib
-from email.mime.base import MIMEBase
-from email.mime.text import MIMEText
 
 # smtp 정보
 host = "smtp.gmail.com" # Gmail SMTP 서버 주소.
 port = "587"
 
-def MakeHtmlDoc(BookList):
+def MakeHtmlDoc(bookMark_List):
     from xml.dom.minidom import getDOMImplementation
     # get Dom Implementation
     impl = getDOMImplementation()
@@ -19,27 +16,45 @@ def MakeHtmlDoc(BookList):
     # Body 엘리먼트 생성.
     body = newdoc.createElement('body')
 
-    for bookitem in BookList:
+    for item in bookMark_List:
         # create bold element
         b = newdoc.createElement('b')
         # create text node
-        ibsnText = newdoc.createTextNode("ISBN:" + bookitem[0])
+        ibsnText = newdoc.createTextNode("< " + item.name + " >") # < 병원명 >
         b.appendChild(ibsnText)
 
         body.appendChild(b)
 
         # BR 태그 (엘리먼트) 생성.
         br = newdoc.createElement('br')
-
         body.appendChild(br)
 
         # create title Element
         p = newdoc.createElement('p')
-        # create text node
-        titleText = newdoc.createTextNode("Title:" + bookitem[1])
+        titleText = newdoc.createTextNode("- " + item.type + " -")
         p.appendChild(titleText)
-
         body.appendChild(p)
+
+        p = newdoc.createElement('p')
+        titleText = newdoc.createTextNode("주소: " + item.addr)
+        p.appendChild(titleText)
+        body.appendChild(p)
+
+        p = newdoc.createElement('p')
+        titleText = newdoc.createTextNode('☎: ' + item.tel)
+        p.appendChild(titleText)
+        body.appendChild(p)
+
+        p = newdoc.createElement('p')
+        titleText = newdoc.createTextNode('HomePage: ' + item.url)
+        p.appendChild(titleText)
+        body.appendChild(p)
+
+        p = newdoc.createElement('p')
+        titleText = newdoc.createTextNode("-----------------------------------------------------------------------")
+        p.appendChild(titleText)
+        body.appendChild(p)
+
         body.appendChild(br)  # line end
 
     # append Body
@@ -47,16 +62,12 @@ def MakeHtmlDoc(BookList):
 
     return newdoc.toxml()
 
-def sendMail():
-    global host, port
-    html = ""
-    title = str(input('Title :'))
-    senderAddr = "doood444@gmail.com"
-    recipientAddr = str(input('recipient email address :'))
-    msgtext = ''
 
-    #html문서 생성하는 부분
-    #html = MakeHtmlDoc(SearchBookTitle(keyword))
+def sendMail(addr, html):
+    global host, port
+    senderAddr = "doood444@gmail.com"
+    recipientAddr = addr
+    msgtext = ''
 
     import mysmtplib
     # MIMEMultipart의 MIME을 생성합니다.
@@ -67,7 +78,7 @@ def sendMail():
     msg = MIMEMultipart('alternative')
 
     # set message
-    msg['Subject'] = title
+    msg['Subject'] = "*** MediWhere 북마크 입니다. ***"
     msg['From'] = senderAddr
     msg['To'] = recipientAddr
 
@@ -85,9 +96,17 @@ def sendMail():
     s.starttls()
     s.ehlo()
     s.login("doood444@gmail.com", "wong1485")  # 로긴을 합니다.
-    s.sendmail(senderAddr, [recipientAddr], msg.as_string())
-    s.close()
+    #s.sendmail(senderAddr, [recipientAddr], msg.as_string())
 
-    print("Mail sending complete!!!")
+    try:
+        s.sendmail(senderAddr, [recipientAddr], msg.as_string())
+    except:
+        print("사망각")
+        s.close()
+        return False
+    else:
+        print("Mail sending complete!!!")
+        s.close()
+        return True
 
 
