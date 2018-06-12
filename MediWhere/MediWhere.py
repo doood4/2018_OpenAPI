@@ -341,7 +341,7 @@ class Mediwhere(Frame):
             for i in self.bookmark_list:
                 self.search_List.insert(END, i.name)
 
-    # 북마크 담기
+    # 북마크 담기 버튼
     def click_inbookmark(self):
         if self.mode == 0 and self.value != '':
             ans = messagebox.askquestion('★북마크 담기', '"' + self.value + '"' + ' 을/를'
@@ -355,9 +355,8 @@ class Mediwhere(Frame):
                         else:
                             msg = messagebox.showerror("★북마크", "이미 담겨 있습니다!")
                         break
-        #print(self.bookmark_list)
 
-    # 북마크 삭제
+    # 북마크 삭제 버튼
     def click_outbookmark(self):
         if self.mode == 1 and self.value != '':
             ans = messagebox.askquestion('★북마크 삭제', '"' + self.value + '"' + ' 을/를'
@@ -374,9 +373,10 @@ class Mediwhere(Frame):
                 for i in self.bookmark_list:
                     self.search_List.insert(END, i.name)
 
-    # 이메일 보내기
+    # 이메일 보내기 버튼
     def click_email(self):
-        if self.mode == 1 and len(self.bookmark_list) != 0: #북마크 모드에서만 보낼수 있음
+        # 북마크 모드에서만 보낼수 있음
+        if self.mode == 1 and len(self.bookmark_list) != 0:
             ## 메일입력창 설정
             self.email_top = Toplevel(self)
             self.email_top.iconbitmap('MediWhere_icon.ico')
@@ -393,8 +393,7 @@ class Mediwhere(Frame):
 
             self.email_top.deiconify()
 
-
-    # 이메일 주소 입력되면 바로 메일 보내자
+    # 이메일 주소 입력되면 메일 보내자
     def set_email_address(self):
         self.email_address = self.email_entrybox.get()
         print(self.email_address)
@@ -404,7 +403,6 @@ class Mediwhere(Frame):
             msg = messagebox.showinfo("EMAIL", "전송 완료!")
         else:
             msg = messagebox.showerror("EMAIL", "전송 실패!")
-
 
     # 홈페이지 접속
     def click_homepage(self):
@@ -422,3 +420,5 @@ def main():
 
 ######################################################
 
+if __name__ == '__main__':
+    main()
