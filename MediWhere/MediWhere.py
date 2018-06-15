@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 from google_map import make_googlemap_url
 from xml_data import *
 import gmail
+import spam
 
 
 class Mediwhere(Frame):
@@ -301,7 +302,8 @@ class Mediwhere(Frame):
     # + 버튼 클릭
     def zoom_in(self):
         if self.map_zoom < 20 and self.map_url != '':
-            self.map_zoom += 1
+            self.map_zoom = spam.plus(self.map_zoom, 1)
+            #self.map_zoom += 1
             self.map_url = make_googlemap_url((self.xpos, self.ypos), self.map_zoom,self.map_type)
             with urlopen(self.map_url) as u:
                 raw_data = u.read()
@@ -313,7 +315,8 @@ class Mediwhere(Frame):
     # - 버튼 클릭
     def zoom_out(self):
         if self.map_zoom > 10 and self.map_url != '':
-            self.map_zoom -= 1
+            self.map_zoom = spam.plus(self.map_zoom, -1)
+            #self.map_zoom -= 1
             self.map_url = make_googlemap_url((self.xpos, self.ypos), self.map_zoom,self.map_type)
             with urlopen(self.map_url) as u:
                 raw_data = u.read()
@@ -419,6 +422,3 @@ def main():
     root.mainloop()
 
 ######################################################
-
-if __name__ == '__main__':
-    main()
