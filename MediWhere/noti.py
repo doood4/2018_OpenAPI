@@ -19,7 +19,7 @@ bot = telepot.Bot(TOKEN)
 def getData(addr1, addr2, addr3, type='', page=1):
     from xml_data import decode_key, url
     queryParams = '?' + urlencode({quote_plus('ServiceKey'): decode_key,
-                                   quote_plus('pageNo'): page, quote_plus('numOfRows'): '20',
+                                   quote_plus('pageNo'): page, quote_plus('numOfRows'): '10',
                                    quote_plus('sidoCd'): sido_dict[addr1],
                                    quote_plus('sgguCd'): sigugun_dict[sido_dict[addr1]][addr2],
                                    quote_plus('emdongNm'): addr3,
