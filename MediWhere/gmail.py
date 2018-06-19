@@ -95,7 +95,7 @@ def sendMail(addr, html):
     s.ehlo()
     s.starttls()
     s.ehlo()
-    s.login("doood444@gmail.com", "wong1485")  # 로긴을 합니다.
+    s.login("doood444@gmail.com", "")  # 로긴을 합니다.
     #s.sendmail(senderAddr, [recipientAddr], msg.as_string())
 
     try:
